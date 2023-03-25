@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	yandexWeatherApiKey := "baea74df-7a43-4d00-9b5d-823f9be09c62"
+	yandexWeatherApiKey := "API-KEY-YANDEX-WEATHER"
 	w, err := weather.GetWeatherWithCache(context.TODO(), yandexWeatherApiKey, 55.60163, 37.34665, time.Hour)
 	if err != nil {
 		log.Fatalln(err)
