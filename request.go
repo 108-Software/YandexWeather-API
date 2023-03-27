@@ -16,13 +16,13 @@ type json2 struct {
 }
 
 func main() {
-	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lan=55.60163&lon=37.34665")
+	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=55.60163&lon=37.34665")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	req.Header.Set("X-Yandex-API-Key", "baea74df-7a43-4d00-9b5d-823f9be09c62")
+	req.Header.Set("X-Yandex-API-Key", "KEY-VALUE")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
