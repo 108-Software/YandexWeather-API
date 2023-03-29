@@ -74,30 +74,36 @@ func database_managed(Temp int, Feels int){			//Внесение значени�
 
 	times := time.Now()
 	db, err := sql.Open("sqlite3", "./weather.db")
-			if err != nil {
-				panic(err)
-			}
-			defer db.Close()
-			// Создание таблицы в базе данных, если она не существует
-			_, err = db.Exec("CREATE TABLE IF NOT EXISTS Weather (id INTEGER PRIMARY KEY AUTOINCREMENT, Время TEXT, Температура INTEGER, Ощущается INTEGER)")
-			if err != nil {
-				log.Fatal("Ошибка создания таблицы в БД: ", err)
-			}
+	
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
-			// Запись метрики в базу данных
-			stmt, err := db.Prepare("INSERT INTO Weather(Время, Температура, Ощущается) values(?,?,?)")
-			if err != nil {
-				log.Fatal("Ошибка подготовки запроса к БД: ", err)
-			}
 
-			data := fmt.Sprintf("%d:%d\n", times.Hour(), times.Minute())
+	// Создание таблицы в базе данных, если она не существует
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Weather (id INTEGER PRIMARY KEY AUTOINCREMENT, Время TEXT, Температура INTEGER, Ощущается INTEGER)")
+	
+	if err != nil {
+		log.Fatal("Ошибка создания таблицы в БД: ", err)
+	}
 
-			_, err = stmt.Exec(data, Temp, Feels)
-			if err != nil {
-				log.Fatal("Ошибка выполнения запроса к БД: ", err)
-			}
+	// Запись метрики в базу данных
+	stmt, err := db.Prepare("INSERT INTO Weather(Время, Температура, Ощущается) values(?,?,?)")
+	
+	if err != nil {
+		log.Fatal("Ошибка подготовки запроса к БД: ", err)
+	}
 
-			fmt.Printf("Упех\n")
-			time.Sleep(1*time.Minute)
+	data := fmt.Sprintf("%d:%d\n", times.Hour(), times.Minute())
+
+	_, err = stmt.Exec(data, Temp, Feels)
+	
+	if err != nil {
+		log.Fatal("Ошибка выполнения запроса к БД: ", err)
+		}
+
+	fmt.Printf("Упех\n")
+	time.Sleep(1*time.Minute)
 
 }
