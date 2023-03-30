@@ -52,7 +52,7 @@ func request_API(){			//Запрос по API
 		panic(err)
 	}
 
-	req.Header.Set("X-Yandex-API-Key", "baea74df-7a43-4d00-9b5d-823f9be09c62")
+	req.Header.Set("X-Yandex-API-Key", "KEY-VALUE")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
