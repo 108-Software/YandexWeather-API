@@ -125,7 +125,18 @@ func check_day() {
 		if data_file == now_date {			// если содержимое файла совпадает с нынешней датой то просто делаем запись в бд
 			fmt.Println("True")
 		} else {							// иначе вызываем функцию создания графа и перезаписываем файл
-			fmt.Println("false")	
+			fmt.Println("false")
+
+			//вызвать функцию создания графа
+
+			file, err := os.Create("curr_data.txt")
+
+			if err != nil {
+				fmt.Println("Unable to create file:", err)
+				os.Exit(1)
+			}
+			defer file.Close()
+			file.WriteString(now_date)	
 		}
 		
 	}
