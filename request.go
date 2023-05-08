@@ -81,6 +81,7 @@ func check_day() error {
 			file, err := os.Create("curr_data.txt")
 
 			if err != nil {
+				log.Print("Ошибка создания файла: ")
 				return err
 			}
 
@@ -95,6 +96,7 @@ func check_day() error {
 
 		file, err := os.Open("curr_data.txt")
 		if err != nil {
+			log.Print("Ошибка открытия файла: ")
 			return err
 		}
 		defer file.Close()
@@ -127,6 +129,7 @@ func check_day() error {
 			file, err := os.Create("curr_data.txt")
 
 			if err != nil {
+				log.Print("Ошибка создания нового файла: ")
 				return err
 			}
 			defer file.Close()
@@ -146,7 +149,8 @@ func request_API() error { //Запрос по API
 	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=55.60123&lon=37.3594")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Print(err)
+		log.Print("Ошибка создание requet запроса : ")
+		return err
 	}
 
 	req.Header.Set("X-Yandex-API-Key", "baea74df-7a43-4d00-9b5d-823f9be09c62")
@@ -154,7 +158,8 @@ func request_API() error { //Запрос по API
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Print(err)
+		log.Print("Ошибка request запроса: ")
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -166,12 +171,14 @@ func request_API() error { //Запрос по API
 	var requ json2
 	err = json.Unmarshal(body, &requ)
 	if err != nil {
-		log.Print(err)
+		log.Print("Ошибка десериализации данных JSON: ")
+		return err
 	}
 
 	err = inser_database(requ.Fact.Temp, requ.Fact.Feels)
 	if err != nil {
-		log.Print("Ошибка записи в бд", err)
+		log.Print("Ошибка записи в бд")
+		return err
 	}
 
 	return nil
@@ -185,24 +192,28 @@ func inser_database(Temp int, Feels int) error { //Внесение значен
 
 	db, err := sql.Open("sqlite3", namedb)
 	if err != nil {
+		log.Print("Ошибка открытия базы данных: ")
 		return err
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Weather (id INTEGER PRIMARY KEY AUTOINCREMENT, Время TEXT, Температура INTEGER, Ощущается INTEGER)")
 	if err != nil {
-		log.Fatal("Ошибка создания таблицы в БД: ", err)
+		log.Fatal("Ошибка создания таблицы в БД: ")
+		return err
 	}
 
 	stmt, err := db.Prepare("INSERT INTO Weather(Время, Температура, Ощущается) values(?,?,?)")
 	if err != nil {
-		log.Fatal("Ошибка подготовки запроса к БД: ", err)
+		log.Fatal("Ошибка подготовки запроса к БД: ")
+		return err
 	}
 
 	data := time.Now().Format("15:04")
 
 	_, err = stmt.Exec(data, Temp, Feels)
 	if err != nil {
-		log.Fatal("Ошибка выполнения запроса к БД: ", err)
+		log.Fatal("Ошибка выполнения запроса к БД: ")
+		return err
 	}
 
 	defer db.Close()
@@ -215,6 +226,7 @@ func read_database(namedb string) error {
 	database := fmt.Sprintf("./Weather/%s.db", namedb)
 	db, err := sql.Open("sqlite3", database)
 	if err != nil {
+		log.Print("Ошибка открытия базы данных: ")
 		return err
 	}
 
@@ -222,6 +234,7 @@ func read_database(namedb string) error {
 
 	rows, err := db.Query("select * from Weather")
 	if err != nil {
+		log.Print("Ошибка запроса к  базе данных: ")
 		return err
 	}
 	defer rows.Close()
@@ -232,6 +245,7 @@ func read_database(namedb string) error {
 		p := weather_data{}
 		err := rows.Scan(&p.id, &p.Время, &p.Температура, &p.Ощущается)
 		if err != nil {
+			log.Print("Ошибка чтения из базы данных: ")
 			return err
 		}
 		gg = append(gg, p)
@@ -239,7 +253,8 @@ func read_database(namedb string) error {
 
 	err = graf(namedb, gg)
 	if err != nil {
-		log.Print("Ошибка создания графа")
+		log.Print("Ошибка создания графа: ")
+		return err
 	}
 	return nil
 }
@@ -286,6 +301,7 @@ func graf(namedb string, data []weather_data) error {
 	// Создание линии для графика
 	line, err := plotter.NewLine(pts)
 	if err != nil {
+		log.Print("Ошибка задания линии 1 для графа: ")
 		return err
 	}
 	line.LineStyle.Width = vg.Points(2)
@@ -294,6 +310,7 @@ func graf(namedb string, data []weather_data) error {
 	//Создание второй линии для графика
 	line2, err := plotter.NewLine(pts2)
 	if err != nil {
+		log.Print("Ошибка задания линии 2 для графа: ")
 		return err
 	}
 	line2.LineStyle.Width = vg.Points(2)
@@ -304,11 +321,13 @@ func graf(namedb string, data []weather_data) error {
 
 	point1, err := plotter.NewScatter(pts)
 	if err != nil {
+		log.Print("Ошибка обрисовка линии 1 на графе: ")
 		return err
 	}
 
 	point2, err := plotter.NewScatter(pts2)
 	if err != nil {
+		log.Print("Ошибка обрисовка линии 2 на графе: ")
 		return err
 	}
 
@@ -325,12 +344,14 @@ func graf(namedb string, data []weather_data) error {
 
 	// Сохранение графика в файл
 	if err := p.Save(10*vg.Inch, 10*vg.Inch, grafs_weather); err != nil {
+		log.Print("Ошибка сохранения графа: ")
 		return err
 	}
 
 	err = send_graf(grafs_weather, namedb)
 	if err != nil {
-		log.Println("Ошибка отправки графа", err)
+		log.Println("Ошибка отправки графа")
+		return err
 	}
 
 	return nil
@@ -339,6 +360,7 @@ func graf(namedb string, data []weather_data) error {
 func send_graf(grafs_weather string, namedb string) error {
 	file, err := os.Open(grafs_weather)
 	if err != nil {
+		log.Print("Ошибка открытия графа: ")
 		return err
 	}
 	defer file.Close()
@@ -351,10 +373,12 @@ func send_graf(grafs_weather string, namedb string) error {
 	image_name := fmt.Sprintf("%s.png", namedb)
 	part, err := writer.CreateFormFile("image", image_name)
 	if err != nil {
+		log.Print("Ошибка добавления графа в форму: ")
 		return err
 	}
 	_, err = io.Copy(part, file)
 	if err != nil {
+		log.Print("Ошибка копирования графа: ")
 		return err
 	}
 	// закрываем форму
@@ -364,6 +388,7 @@ func send_graf(grafs_weather string, namedb string) error {
 	url := fmt.Sprintf("https://api.imgbb.com/1/upload?&key=%s", "a6727c8c01cab9bea1aeaf867b7588ab")
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
+		log.Print("Ошибка запроса к сервису: ")
 		return err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -372,6 +397,7 @@ func send_graf(grafs_weather string, namedb string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Print("Ошибка отправки графа: ")
 		return err
 	}
 	defer resp.Body.Close()
