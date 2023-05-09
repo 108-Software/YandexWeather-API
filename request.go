@@ -47,7 +47,7 @@ func main() {
 	s.Every(1).Minutes().Do(func() {
 		err := cycle()
 		if err != nil {
-			log.Println("Не был запущен цикл проверен времени", err)
+			log.Println("Не был запущен цикл проверки времени", err)
 		}
 	})
 
