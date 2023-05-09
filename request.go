@@ -62,6 +62,7 @@ func cycle() error { //Вечный цикл
 	if times.Minute() == 30 || times.Minute() == 00 {
 		err := check_day()
 		if err != nil {
+			log.Print("Ошибка проверки текущего дня: ")
 			return err
 		}
 
